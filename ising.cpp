@@ -12,11 +12,12 @@ int mc(int L, double J, double kT, int Nmc, int thermal);
 
 // run the main program
 int main() {
-	int L = 10;
+	int L = 5;
 	double J=1.0;
-	vector<vector<int>> state;
-	state = init(L);
-	cout << energy(state, J) << ' ';
+	double kT=5.0;
+	int Nmc=10000;
+	int thermal=10000;
+	mc(L, J, kT, Nmc, thermal);
       	return 0;
 }
 
@@ -37,7 +38,7 @@ vector<vector<int>> init(int L) {
 // neighbors: calculate interaction with neighboring spins
 int neighbors(vector<vector<int>> state, int i, int j) {
 	int L = state.size();
-	// this is probably dumb
+	// this is probably dumb but it maps to the python way
 	int left = state[(L+(i-1))%L][j]; 	// left neighbor
 	int right = state[(L+(i+1))%L][j];     // right neighbor
 	int up = state[i][(L+(j-1))%L]; 	// up neighbor
@@ -58,28 +59,34 @@ double energy(vector<vector<int>> state, double J) {
 }
 // the main monte carlo function 
 int mc(int L, double J, double kT, int Nmc, int thermal) {
+	cout << "Starting simulation..." << endl;
 	vector<vector<int>> state;
-	state = init(state);
-	int L = state.size();
+	state = init(L);
+	int size2 = int (L*L);
 	double Eavg = 0.0;
-	for(n=0; n<(thermal+Nmc); n++) {
+	for(int n=0; n<(thermal+Nmc); n++) {
 		double E = energy(state, J);
-		for(s=0; s<(L*L); s++) {
-			int row=int ((rand()/RAND_MAX)*L);
-			int col=int ((rand()/RAND_MAX)*L);
-			int spin = state[row, col];
-			double dE =2*J*spin*neighbors(state, row, col);
-			prob=exp (-dE/kT);
+		for(int s=0; s<size2; s++) {
+			int row= (int) ((rand()/RAND_MAX)*(double) L);
+			int col= (int) ((rand()/RAND_MAX)*(double) L);
+			int spin = state[row][col];
+			double dE = 2.0 * J * (double) (spin) * (double) (neighbors(state, row, col));
+			double prob = exp (-dE/kT);
 			if(dE <=0 || (rand()/RAND_MAX) <= prob) {
-				state[row, col] = -state[row, col];
+				state[row][col] *= -1;
 				if(n>=thermal) {
 					E += dE;
-				}
-			}
-		}
-	}
+				}//are we thermal?
+			}//did we accept this move?
+		}//end loop over lattice
+		if(n>=thermal) {
+			Eavg += E;
+		}//not thermalized yet
+	}//end Mc steps
+	Eavg /= double (Nmc);
+	cout << "E = " << Eavg << endl;
 	return 0;
-}
+}//end mc
 
 
 
