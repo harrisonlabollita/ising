@@ -27,4 +27,34 @@ function init(L) result (state)
                 end do
         end do
 end function init
+
+
+function neighbors(state, i, j) result (neigh)
+        ! calculate interaction with neighbors
+        implicit none
+        integer :: L, i, j, neigh
+        integer, dimension(L, L) :: state
+        L = size(state, 1)
+        ! TODO: calculate left, right, up, down
+        neigh = left+right+up+down
+end function neighbors
+
+
+
+function energy(state, J) result (E)
+        ! calculate the energy of a given state
+        implicit none
+        integer :: L, i, j
+        real :: J
+        real :: E = 0.0
+        integer, dimension(L, L) :: state
+        L = size(state, 1)
+        do i=1,L
+                do j=1,L
+                E -= J*state*neighbors(state, i, j)
+                end do
+        end do
+end function energy
+
+
 end program main
