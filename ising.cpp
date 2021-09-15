@@ -6,19 +6,15 @@ using namespace std;
 
 //declare functions
 vector<vector<int>> init(int L);
+int neighbors(vector<vector <int>> state, int i, int j);
 
 // run the main program
 int main() {
 	int L = 10;
 	vector<vector<int>> state;
 	state = init(L);
-
-	for(int i=0; i<L; i++) {
-		for(int j=0; j<L; j++) {
-			cout << state[i][j] << ' ';
-	        }
-      }
-      return 0;
+	cout << neighbors(state, 0, 0) << ' ';
+      	return 0;
 }
 
 
@@ -34,3 +30,15 @@ vector<vector<int>> init(int L) {
 	}
 	return state;
 }
+
+// neighbors: calculate interaction with neighboring spins
+int neighbors(vector<vector<int>> state, int i, int j) {
+	int L = state.size();
+	// this is probably dumb
+	int left = state[(L+(i-1))%L][j]; 	// left neighbor
+	int right = state[(L+(i+1))%L][j];     // right neighbor
+	int up = state[i][(L+(j-1))%L]; 	// up neighbor
+	int down = state[j][(L+(j+1))%L];     // down neighbor
+	return left+right+up+down;
+}
+
