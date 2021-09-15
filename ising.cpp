@@ -7,13 +7,16 @@ using namespace std;
 //declare functions
 vector<vector<int>> init(int L);
 int neighbors(vector<vector <int>> state, int i, int j);
+double energy(vector<vector<int>> state, double J);
+int mc(int L, double J, double kT, int Nmc, int thermal);
 
 // run the main program
 int main() {
 	int L = 10;
+	double J=1.0;
 	vector<vector<int>> state;
 	state = init(L);
-	cout << neighbors(state, 0, 0) << ' ';
+	cout << energy(state, J) << ' ';
       	return 0;
 }
 
@@ -41,4 +44,45 @@ int neighbors(vector<vector<int>> state, int i, int j) {
 	int down = state[j][(L+(j+1))%L];     // down neighbor
 	return left+right+up+down;
 }
+
+//calculate the total energy of a state
+double energy(vector<vector<int>> state, double J) {
+	double E = 0.0;
+	int L = state.size();
+	for(int i=0; i<L; i++) {
+		for(int j=0; j<L; j++) {
+			E -= J*state[i][j]*neighbors(state, i, j);
+		}
+	}
+	return E;
+}
+// the main monte carlo function 
+int mc(int L, double J, double kT, int Nmc, int thermal) {
+	vector<vector<int>> state;
+	state = init(state);
+	int L = state.size();
+	double Eavg = 0.0;
+	for(n=0; n<(thermal+Nmc); n++) {
+		double E = energy(state, J);
+		for(s=0; s<(L*L); s++) {
+			int row=int ((rand()/RAND_MAX)*L);
+			int col=int ((rand()/RAND_MAX)*L);
+			int spin = state[row, col];
+			double dE =2*J*spin*neighbors(state, row, col);
+			prob=exp (-dE/kT);
+			if(dE <=0 || (rand()/RAND_MAX) <= prob) {
+				state[row, col] = -state[row, col];
+				if(n>=thermal) {
+					E += dE;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+
+
+
+	
 
