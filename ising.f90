@@ -2,10 +2,13 @@ program main
         implicit none
         integer, parameter:: L = 10
         real, parameter :: Jint = 1.0
-        integer, dimension(L, L) :: state
-
-        state = init(L)
-        print *, energy(state, Jint)
+        real, parameter :: kT = 5.0
+        integer, parameter :: Nmc = 10000
+        integer, parameter :: thermal = 1000
+        real :: Esim
+        Esim  = mc(L, Jint, kT, Nmc, thermal)
+        ! maybe should be rewritten as a subroutine?
+        ! call mc(.....)
 
 contains
         function init(L) result (state)
@@ -62,4 +65,37 @@ contains
                  end if
                  neigh = state(ileft, j)+state(iright, j)+state(i,jup)+state(i,jdn)
          end function neighbors
+
+         function mc(L, Jint, kT, Nmc, thermal) result (Eavg)
+                 implicit none
+                 integer :: L, Nmc, thermal, size2
+                 integer :: n, s, spin, row, col
+                 integer, dimension(L, L) :: state
+                 real :: Eavg, Jint, kT, E, dE, prob
+                 print*, "Starting simulation..."
+                 size2 = int(L*L)
+                 state = init(L)
+                 Eavg = 0.0
+                 do n=1,(Nmc+thermal)
+                        E = energy(state, Jint)
+                        do s=1,size2
+                                row = int(rand()*real(L-1)) + 1
+                                col = int(rand()*real(L-1)) + 1
+                                spin = state(row, col)
+                                dE = 2.0*Jint*real(spin)*real(neighbors(state, row, col))
+                                prob = exp(-1.0*dE/kT)
+                                if(dE <= 0 .or. rand() <= prob) then
+                                        state(row,col) = -1*state(row,col)
+                                        if(n>=thermal) then
+                                                E = E + dE
+                                        end if
+                                end if
+                        end do
+                        if (n>=thermal) then
+                                Eavg = Eavg + E
+                        end if
+                end do
+                Eavg = Eavg/real(Nmc)
+                print*, "E = ", Eavg
+         end function mc
 end program main
