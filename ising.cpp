@@ -8,15 +8,17 @@ using namespace std;
 vector<vector<int>> init(int L);
 int neighbors(vector<vector <int>> state, int i, int j);
 double energy(vector<vector<int>> state, double J);
+double magnet(vector<vector<int>> state);
+vector<vector<int>> thermalize(vector<vector<int>> state, double J, int thermal);
 int mc(int L, double J, double kT, int Nmc, int thermal);
 
 // run the main program
 int main() {
-	int L = 5;
+	int L = 8;
 	double J=1.0;
 	double kT=5.0;
-	int Nmc=10000;
-	int thermal=10000;
+	int Nmc=1000000;
+	int thermal=100000;
 	mc(L, J, kT, Nmc, thermal);
       	return 0;
 }
@@ -57,15 +59,25 @@ double energy(vector<vector<int>> state, double J) {
 	}
 	return E;
 }
-// the main monte carlo function 
-int mc(int L, double J, double kT, int Nmc, int thermal) {
-	cout << "Starting simulation..." << endl;
-	vector<vector<int>> state;
-	state = init(L);
+
+double magnet(vector<vector<int>> state) {
+	double M = 0.0;
+	int L = state.size();
+	for(int i=0; i<L; i++){
+		for(int j=0; j<L; j++){
+			M += state[i][j];
+		}
+	}
+	M /= L;
+	return M;
+}
+
+
+vector<vector<int>> thermalize(vector<vector<int>> state, double J, double kT, int thermal){
+	cout << "thermalizing..." << endl;
+	int L = state.size();
 	int size2 = int (L*L);
-	double Eavg = 0.0;
-	for(int n=0; n<(thermal+Nmc); n++) {
-		double E = energy(state, J);
+	for(int n=0; n<thermal; n++) {
 		for(int s=0; s<size2; s++) {
 			int row= (int) ((rand()/RAND_MAX)*(double) L);
 			int col= (int) ((rand()/RAND_MAX)*(double) L);
@@ -74,17 +86,46 @@ int mc(int L, double J, double kT, int Nmc, int thermal) {
 			double prob = exp (-dE/kT);
 			if(dE <=0 || (rand()/RAND_MAX) <= prob) {
 				state[row][col] *= -1;
-				if(n>=thermal) {
-					E += dE;
-				}//are we thermal?
 			}//did we accept this move?
 		}//end loop over lattice
-		if(n>=thermal) {
-			Eavg += E;
-		}//not thermalized yet
+	}//end thermalization
+	cout << "finished thermalization..." << endl;
+	return state;
+}
+
+
+// the main monte carlo function 
+int mc(int L, double J, double kT, int Nmc, int thermal) {
+	cout << "Starting simulation..." << endl;
+	vector<vector<int>> state;
+	state = init(L);
+	state = thermalize(state, J, kT, thermal);
+	int size2 = int (L*L);
+	double Eavg = 0.0;
+	double Mavg = 0.0;
+	for(int n=0; n<Nmc; n++) {
+		double E = energy(state, J);
+		double M = magnet(state);
+		for(int s=0; s<size2; s++) {
+			int row= (int) ((rand()/RAND_MAX)*(double) L);
+			int col= (int) ((rand()/RAND_MAX)*(double) L);
+			int spin = state[row][col];
+			double dE = 2.0 * J * (double) (spin) * (double) (neighbors(state, row, col));
+			double prob = exp (-dE/kT);
+			if(dE <=0 || (rand()/RAND_MAX) <= prob) {
+				state[row][col] *= -1;
+				E += dE;
+				M += 2*state[row][col];
+			}//did we accept this move?
+		}//end loop over lattice
+		Eavg += E;
+		Mavg += M;
 	}//end Mc steps
-	Eavg /= double (Nmc);
+	Eavg /= (double (Nmc) * double (L) * double(L));
+	Mavg /= (double (Nmc) * double (L) * double(L));
+
 	cout << "E = " << Eavg << endl;
+	cout << "M = " << Mavg << endl;
 	return 0;
 }//end mc
 
