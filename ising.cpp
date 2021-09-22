@@ -14,11 +14,11 @@ int mc(int L, double J, double kT, int Nmc, int thermal);
 
 // run the main program
 int main() {
-	int L = 8;
-	double J=1.0;
-	double kT=5.0;
-	int Nmc=1000000;
-	int thermal=100000;
+	static const int L = 8;
+	static const double J=1.0;
+	static const double kT=5.0;
+	static const int Nmc=1000000;
+	static const int thermal=100000;
 	mc(L, J, kT, Nmc, thermal);
       	return 0;
 }
@@ -39,7 +39,7 @@ vector<vector<int>> init(int L) {
 
 // neighbors: calculate interaction with neighboring spins
 int neighbors(vector<vector<int>> state, int i, int j) {
-	int L = state.size();
+	const int L = state.size();
 	// this is probably dumb but it maps to the python way
 	int left = state[(L+(i-1))%L][j]; 	// left neighbor
 	int right = state[(L+(i+1))%L][j];     // right neighbor
@@ -51,7 +51,7 @@ int neighbors(vector<vector<int>> state, int i, int j) {
 //calculate the total energy of a state
 double energy(vector<vector<int>> state, double J) {
 	double E = 0.0;
-	int L = state.size();
+	const int L = state.size();
 	for(int i=0; i<L; i++) {
 		for(int j=0; j<L; j++) {
 			E -= J*state[i][j]*neighbors(state, i, j);
@@ -75,8 +75,8 @@ double magnet(vector<vector<int>> state) {
 
 vector<vector<int>> thermalize(vector<vector<int>> state, double J, double kT, int thermal){
 	cout << "thermalizing..." << endl;
-	int L = state.size();
-	int size2 = int (L*L);
+	const int L = state.size();
+	const int size2 = int (L*L);
 	for(int n=0; n<thermal; n++) {
 		for(int s=0; s<size2; s++) {
 			int row= (int) ((rand()/RAND_MAX)*(double) L);
@@ -95,12 +95,12 @@ vector<vector<int>> thermalize(vector<vector<int>> state, double J, double kT, i
 
 
 // the main monte carlo function 
-int mc(int L, double J, double kT, int Nmc, int thermal) {
+int mc(const int L, const double J, const double kT, const int Nmc, const int thermal) {
 	cout << "Starting simulation..." << endl;
 	vector<vector<int>> state;
 	state = init(L);
 	state = thermalize(state, J, kT, thermal);
-	int size2 = int (L*L);
+	const int size2 = int (L*L);
 	double Eavg = 0.0;
 	double Mavg = 0.0;
 	for(int n=0; n<Nmc; n++) {
