@@ -5,11 +5,11 @@
 using namespace std;
 
 //declare functions
-vector<vector<int>> init(int L);
-int neighbors(vector<vector <int>> state, int i, int j);
-double energy(vector<vector<int>> state, double J);
-double magnet(vector<vector<int>> state);
-vector<vector<int>> thermalize(vector<vector<int>> state, double J, int thermal);
+vector<vector<int> > init(int L);
+int neighbors(vector<vector <int> > state, int i, int j);
+double energy(vector<vector<int> > state, double J);
+double magnet(vector<vector<int> > state);
+vector<vector<int> > thermalize(vector<vector<int> > state, double J, int thermal);
 int mc(int L, double J, double kT, int Nmc, int thermal);
 
 // run the main program
@@ -26,8 +26,8 @@ int main() {
 
 
 // init: initialize the state as matrix of 1's and -1's
-vector<vector<int>> init(int L) {
-	vector<vector<int>> state;
+vector<vector<int> > init(int L) {
+	vector<vector<int> > state;
 	state.resize(L, vector<int>(L, 0));
 	for(int i=0; i<L; i++) {
 		for(int j=0; j<L; j++) {
@@ -38,7 +38,7 @@ vector<vector<int>> init(int L) {
 }
 
 // neighbors: calculate interaction with neighboring spins
-int neighbors(vector<vector<int>> state, int i, int j) {
+int neighbors(vector<vector<int> > state, int i, int j) {
 	const int L = state.size();
 	// this is probably dumb but it maps to the python way
 	int left = state[(L+(i-1))%L][j]; 	// left neighbor
@@ -49,7 +49,7 @@ int neighbors(vector<vector<int>> state, int i, int j) {
 }
 
 //calculate the total energy of a state
-double energy(vector<vector<int>> state, double J) {
+double energy(vector<vector<int> > state, double J) {
 	double E = 0.0;
 	const int L = state.size();
 	for(int i=0; i<L; i++) {
@@ -60,7 +60,7 @@ double energy(vector<vector<int>> state, double J) {
 	return E;
 }
 
-double magnet(vector<vector<int>> state) {
+double magnet(vector<vector<int> > state) {
 	double M = 0.0;
 	int L = state.size();
 	for(int i=0; i<L; i++){
@@ -73,7 +73,7 @@ double magnet(vector<vector<int>> state) {
 }
 
 
-vector<vector<int>> thermalize(vector<vector<int>> state, double J, double kT, int thermal){
+vector<vector<int> > thermalize(vector<vector<int> > state, double J, double kT, int thermal){
 	cout << "thermalizing..." << endl;
 	const int L = state.size();
 	const int size2 = int (L*L);
@@ -97,7 +97,7 @@ vector<vector<int>> thermalize(vector<vector<int>> state, double J, double kT, i
 // the main monte carlo function 
 int mc(const int L, const double J, const double kT, const int Nmc, const int thermal) {
 	cout << "Starting simulation..." << endl;
-	vector<vector<int>> state;
+	vector<vector<int> > state;
 	state = init(L);
 	state = thermalize(state, J, kT, thermal);
 	const int size2 = int (L*L);
