@@ -1,3 +1,5 @@
+! rewrite in a more fortran elegent way with subroutine calls
+
 program main
         implicit none
         integer, parameter:: L = 8
@@ -45,6 +47,7 @@ contains
                  integer :: L, neigh, i, j
                  integer :: ileft, iright, jup, jdn
                  integer, dimension(:, :) :: state
+                 ! fix this
                  L = size(state, 1)
                  ileft = mod(i-1, L)
                  iright = mod(i+1, L)

@@ -4,6 +4,9 @@
 #include <iostream>
 using namespace std;
 
+//TODO: rewrite as a class in more of a c++ fashion
+
+
 //declare functions
 vector<vector<int> > init(int L);
 int neighbors(vector<vector <int> > state, int i, int j);
