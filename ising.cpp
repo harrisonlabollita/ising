@@ -17,12 +17,16 @@ int mc(int L, double J, double kT, int Nmc, int thermal);
 
 // run the main program
 int main() {
-	static const int L = 8;
+	static const int L = 10;
 	static const double J=1.0;
-	static const double kT=5.0;
-	static const int Nmc=1000000;
-	static const int thermal=100000;
-	mc(L, J, kT, Nmc, thermal);
+	static const int Nmc=100000;
+	static const int thermal=10000;
+	static const double startT = 0.05;
+	static const double stopT  = 4.95;
+	for(int i=0; i < 30; i++) {
+		double kT = startT + (i/30)*stopT;
+		mc(L, J, kT, Nmc, thermal);
+	}
       	return 0;
 }
 
@@ -99,7 +103,7 @@ vector<vector<int> > thermalize(vector<vector<int> > state, double J, double kT,
 
 // the main monte carlo function 
 int mc(const int L, const double J, const double kT, const int Nmc, const int thermal) {
-	cout << "Starting simulation..." << endl;
+	cout << "starting simulation at T=" << kT << endl;
 	vector<vector<int> > state;
 	state = init(L);
 	state = thermalize(state, J, kT, thermal);
